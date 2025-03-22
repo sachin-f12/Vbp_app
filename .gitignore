@@ -1,0 +1,31 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env/
+*.env
+
+# Cache files
+.cache/
+
+# FastAPI & Dependency Files
+*.log
+*.sqlite3
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# VS Code settings
+.vscode/
+
+# IDE & Editor Directories
+.idea/
+*.swp
+*.swo
+
+# MacOS & System Files
+.DS_Store
+Thumbs.db
