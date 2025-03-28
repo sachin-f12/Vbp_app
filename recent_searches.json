@@ -1,0 +1,84 @@
+{
+    "recent_searches": [
+        {
+            "search_terms": [
+                "anemia"
+            ],
+            "search_operator": "AND",
+            "search_source": "Google Scholar",
+            "max_results": 10
+        },
+        {
+            "search_terms": [
+                "cancer"
+            ],
+            "search_operator": "AND",
+            "search_source": "Google Scholar",
+            "max_results": 10
+        },
+        {
+            "search_terms": [
+                "COVID-19"
+            ],
+            "search_operator": "AND",
+            "search_source": "Google Scholar",
+            "max_results": 10
+        },
+        {
+            "search_terms": [
+                "cancer AND maleria"
+            ],
+            "search_operator": "AND",
+            "search_source": "PubMed",
+            "max_results": 10
+        },
+        {
+            "search_terms": [
+                "Anemia AND Osteoporosis"
+            ],
+            "search_operator": "AND",
+            "search_source": "BOTH",
+            "max_results": 10
+        },
+        {
+            "search_terms": [
+                "Anemia AND Osteoporosis"
+            ],
+            "search_operator": "AND",
+            "search_source": "Google Scholar",
+            "max_results": 10
+        },
+        {
+            "search_terms": [
+                "Anemia"
+            ],
+            "search_operator": "OR",
+            "search_source": "Google Scholar",
+            "max_results": 10
+        },
+        {
+            "search_terms": [
+                "Anemia"
+            ],
+            "search_operator": "OR",
+            "search_source": "Google Scholar",
+            "max_results": 10
+        },
+        {
+            "search_terms": [
+                "Anemia"
+            ],
+            "search_operator": "OR",
+            "search_source": "Google Scholar",
+            "max_results": 10
+        },
+        {
+            "search_terms": [
+                "Anemia"
+            ],
+            "search_operator": "OR",
+            "search_source": "BOTH",
+            "max_results": 10
+        }
+    ]
+}

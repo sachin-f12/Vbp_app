@@ -26,3 +26,8 @@ vbp_fastapi/
 ├── Input/                    # Input files and downloaded PDFs
 │
 └── tests/                    # Unit tests
+
+
+install
+choco install poppler
+openai

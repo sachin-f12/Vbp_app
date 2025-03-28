@@ -1,17 +1,19 @@
-# pubmed_utils.py
 import requests
 from bs4 import BeautifulSoup
 import logging
 from pathlib import Path
 import time
 import re
-
 PUBMED_SEARCH_URL = "https://www.ncbi.nlm.nih.gov/pmc/?term="
 BASE_URL = 'https://www.ncbi.nlm.nih.gov/pmc/articles/'
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'
 CHUNK_SIZE = 1024
 RETRIES = 3
 BACKOFF_FACTOR = 0.3
+
+OUTPUT_DIR = Path("download/PubMed")
+# OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
 
 def create_session():
     session = requests.Session()
@@ -116,67 +118,59 @@ def get_pdf_link(session, pmcid):
         logging.error(f"Error getting PDF link for {pmcid}: {e}")
         return None
 
-def download_pdf(pmcid, dir):
-    """
-    Download PDF with improved error handling and URL construction
-    """
-    session = create_session()
-    Path(dir).mkdir(parents=True, exist_ok=True)
-    pdf_path = Path(dir) / f"{pmcid}.pdf"
+
+
+def sanitize_filename(filename):
+    """Sanitize folder names to remove invalid characters."""
+    return re.sub(r'[<>:"/\\|?*]', '_', filename)
+
+def download_pdf(pmcid, search_term, search_source="PubMed"):
+    """Download the PDF and store it in a dynamically created search-term-based directory."""
     
+    # Sanitize the search term to create a valid folder name
+    safe_search_term = sanitize_filename(search_term)
+
+    # Determine correct storage directory
+    if search_source == "BOTH":
+        output_dir = Path(f"download/Both/PubMed/{safe_search_term}")
+    else:
+        output_dir = Path(f"download/PubMed/{safe_search_term}")
+
+    output_dir.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
+    pdf_path = output_dir / f"{pmcid}.pdf"
+
     # Skip if already downloaded
     if pdf_path.exists() and pdf_path.stat().st_size > 1000:
-        logging.info(f"PDF already exists for {pmcid}")
-        return True
-    
+        logging.info(f"PDF already exists: {pdf_path}")
+        return str(pdf_path)
+
+    # Download process remains the same
+    session = create_session()
     try:
         pdf_url = get_pdf_link(session, pmcid)
         if not pdf_url:
             logging.error(f"Could not find PDF link for {pmcid}")
-            return False
-        
-        for attempt in range(RETRIES):
-            try:
-                # Add required headers for PDF download
-                headers = {
-                    'User-Agent': USER_AGENT,
-                    'Accept': 'application/pdf',
-                    'Referer': f"{BASE_URL}{pmcid}/"
-                }
-                
-                response = session.get(pdf_url, headers=headers, stream=True, timeout=30)
-                response.raise_for_status()
-                
-                # Verify content type
-                content_type = response.headers.get('content-type', '').lower()
-                if 'pdf' not in content_type and 'octet-stream' not in content_type:
-                    logging.error(f"Invalid content type for {pmcid}: {content_type}")
-                    return False
-                
-                # Download PDF
-                with open(pdf_path, 'wb') as f:
-                    for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
-                        if chunk:
-                            f.write(chunk)
-                
-                # Verify file size
-                if pdf_path.stat().st_size < 1000:
-                    pdf_path.unlink()
-                    logging.error(f"Downloaded file too small for {pmcid}")
-                    return False
-                
-                logging.info(f"Successfully downloaded PDF for {pmcid}")
-                return True
-                
-            except requests.exceptions.RequestException as e:
-                if attempt + 1 == RETRIES:
-                    raise
-                time.sleep(BACKOFF_FACTOR * (2 ** attempt))
-                
+            return None
+
+        headers = {'User-Agent': USER_AGENT, 'Accept': 'application/pdf'}
+        response = session.get(pdf_url, headers=headers, stream=True, timeout=30)
+        response.raise_for_status()
+
+        with open(pdf_path, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
+                if chunk:
+                    f.write(chunk)
+
+        if pdf_path.stat().st_size < 1000:
+            pdf_path.unlink()
+            logging.error(f"Downloaded file too small for {pmcid}")
+            return None
+
+        logging.info(f"Successfully downloaded PDF: {pdf_path}")
+        return str(pdf_path)
+
     except Exception as e:
         logging.error(f"Failed to download PDF for {pmcid}: {e}")
-        if pdf_path.exists():
-            pdf_path.unlink()
-        return False
+        return None
     finally:
         session.close()
